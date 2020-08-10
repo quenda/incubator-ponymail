@@ -122,7 +122,7 @@ def dkim(_msg, _body, lid, _attachments, raw_msg):
     _attachments - list of attachments (not used)
     raw_msg - the original message bytes
 
-    Returns: str "<pibble>", a ten character custom base32 encoded hash
+    Returns: str "<pibble>", a sixteen char custom base32 encoded hash
     """
     headers, body = rfc822_parse_dkim(raw_msg,
         head_canon = True, body_canon = True,
