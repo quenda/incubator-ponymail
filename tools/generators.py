@@ -110,20 +110,21 @@ def pibble(hashable, size = 10):
 
 # DKIM generator: uses DKIM canonicalisation
 # Used by default
-def dkim(msg, _body, lid, _attachments):
+def dkim(_msg, _body, lid, _attachments, raw_msg):
     """
     DKIM generator: uses DKIM relaxed/simple canonicalisation
     We use the headers recommended in RFC 4871, plus DKIM-Signature
 
     Parameters:
-    msg - the parsed message
+    _msg - the parsed message (not used)
     _body - the parsed text content (not used)
     lid - list id
     _attachments - list of attachments (not used)
+    raw_msg - the original message bytes
 
     Returns: str "<pibble>", a ten character custom base32 encoded hash
     """
-    headers, body = rfc822_parse_dkim(msg.as_bytes(),
+    headers, body = rfc822_parse_dkim(raw_msg,
         head_canon = True, body_canon = True,
         head_subset = rfc4871_subset, other_list_id = lid)
     hashable = b"".join([h for header in headers for h in header])
@@ -136,7 +137,7 @@ def dkim(msg, _body, lid, _attachments):
 # Full generator: uses the entire email (including server-dependent data)
 # Used by default until August 2020.
 # See 'dkim' for recommended generation.
-def full(msg, _body, lid, _attachments):
+def full(msg, _body, lid, _attachments, _raw_msg):
     """
     Full generator: uses the entire email
     (including server-dependent data)
@@ -148,6 +149,7 @@ def full(msg, _body, lid, _attachments):
     _body - the parsed text content (not used)
     lid - list id
     _attachments - list of attachments (not used)
+    _raw_msg - the original message bytes (not used)
 
     Returns: "<hash>@<lid>" where hash is sha224 of message bytes
     """
@@ -156,7 +158,7 @@ def full(msg, _body, lid, _attachments):
 
 # Medium: Standard 0.9 generator - Not recommended for future installations.
 # See 'full' or 'cluster' generators instead.
-def medium(msg, body, lid, _attachments):
+def medium(msg, body, lid, _attachments, _raw_msg):
     """
     Standard 0.9 generator - Not recommended for future installations.
     (does not generate sufficiently unique ids)
@@ -179,6 +181,7 @@ def medium(msg, body, lid, _attachments):
     body - the parsed text content (may be null)
     lid - list id
     _attachments - list of attachments (not used)
+    _raw_msg - the original message bytes (not used)
 
     Returns: "<hash>@<lid>" where hash is sha224 of the message items noted above
     """
@@ -209,7 +212,7 @@ def medium(msg, body, lid, _attachments):
 # Original medium generator used for a while in June 2016
 # Committed: https://gitbox.apache.org/repos/asf?p=incubator-ponymail.git;a=commitdiff;h=aa989610
 # Replaced:  https://gitbox.apache.org/repos/asf?p=incubator-ponymail.git;a=commitdiff;h=4732d25f
-def medium_original(msg, body, lid, _attachments):
+def medium_original(msg, body, lid, _attachments, _raw_msg):
     """
     NOT RECOMMENDED - does not generate sufficiently unique ids
     Also the lid is included in the hash; this causes problems if the listname needs to be changed.
@@ -224,6 +227,7 @@ def medium_original(msg, body, lid, _attachments):
     body - the parsed text content (may be null)
     lid - list id
     _attachments - list of attachments (not used)
+    _raw_msg - the original message bytes (not used)
 
     Returns: "<hash>@<lid>" where hash is sha224 of the message items noted above
     """
@@ -249,7 +253,7 @@ def medium_original(msg, body, lid, _attachments):
 # as the archived-at may change from node to node (and will change if not in the raw mbox file)
 # Also the lid is not included in the hash, so the hash does not change if the lid is overridden
 #
-def cluster(msg, body, lid, attachments):
+def cluster(msg, body, lid, attachments, _raw_msg):
     """
     Use data that is guaranteed to be the same across cluster setups
     For mails with a valid Message-ID this is likely to be unique
@@ -276,6 +280,7 @@ def cluster(msg, body, lid, attachments):
     body - the parsed text content
     lid - list id
     attachments - list of attachments (uses the hashes)
+    _raw_msg - the original message bytes (not used)
 
     Returns: "r<hash>@<lid>" where hash is sha224 of the message items noted above
     """
@@ -321,7 +326,7 @@ def cluster(msg, body, lid, attachments):
 
 
 # Old school way of making IDs
-def legacy(msg, body, lid, _attachments):
+def legacy(msg, body, lid, _attachments, _raw_msg):
     """
     Original generator - DO NOT USE
     (does not generate unique ids)
@@ -336,6 +341,7 @@ def legacy(msg, body, lid, _attachments):
     body - the parsed text content (may be null)
     lid - list id
     _attachments - list of attachments (not used)
+    _raw_msg - the original message bytes (not used)
 
     Returns: "<hash>@<uid_mdate>@<lid>" where hash is sha224 of the message items noted above
     """
