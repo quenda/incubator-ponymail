@@ -76,7 +76,8 @@ def rfc822_parse_dkim(suffix,
 
     # Optional X-Other-List-ID augmentation
     if (other_list_id is not None) and (other_list_id not in list_ids):
-        headers.append([b"X-Other-List-ID", b" " + other_list_id])
+        xoli_value = b" " + bytes(other_list_id, "ascii")
+        headers.append([b"X-Other-List-ID", xoli_value])
     # Optional head canonicalisation (DKIM relaxed)
     if head_canon is True:
         for i in range(len(headers)):
@@ -125,7 +126,7 @@ def dkim(msg, _body, lid, _attachments):
     headers, body = rfc822_parse_dkim(msg.as_bytes(),
         head_canon = True, body_canon = True,
         head_subset = rfc4871_subset, other_list_id = lid)
-    hashable = b"".join(headers)
+    hashable = b"".join([h for header in headers for h in header])
     if body:
         hashable += b"\r\n" + body
     # The pibble is the 80-bit SHA3-256 prefix
